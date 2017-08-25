@@ -112,7 +112,7 @@ static void _print_expression(Expression expression, const char *letters,
 }
 
 void free_expression(Expression *expression) {
-  if (expression == NULL) return;
+  if (expression == NULL || *expression == NULL) return;
   switch ((*expression)->type) {
     case LAMBDA:
       free_expression(&(*expression)->lambda);

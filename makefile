@@ -103,7 +103,7 @@ $(BIN_DIR)/lib$(NAME).a: $(LOBJS)
 $(BIN_DIR)/$(NAME): $(OBJS)
 	@printf 'Building $@ from $^...\t'
 	@mkdir -p $(BIN_DIR)
-	@$(CC) $(LDFLAGS) -o $@ $<
+	$(CC) $(LDFLAGS) -o $@ $^
 	@echo 'Done'
 
 $(OBJ_DIR)/%.l.o: $(SRC_DIR)/%.c
