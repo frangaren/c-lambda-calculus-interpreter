@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 
 #define AST_SHORT
@@ -7,7 +8,7 @@
 int main(int argc, char **argv) {
   /* Expected output:
         (λa.λb.λc.b (a b c)) (λa.λb.a b) ⟶
-          λa.λb.a ((λc.λd.c d) a b)
+          λa.λb.a (a b)
   */
   Expression e = app(
                      lam(lam(lam(app(
@@ -20,7 +21,14 @@ int main(int argc, char **argv) {
                      lam(lam(app(
                                  var(1),
                                  var(0)))));
+  Expression outcome = lam(lam(app(
+                                   var(1),
+                                   app(
+                                       var(1),
+                                       var(0)))));
   step_eval_in_place(&e);
+  assert(check_equal_expression(e, outcome));
   free_expression(&e);
+  free_expression(&outcome);
   return 0;
 }

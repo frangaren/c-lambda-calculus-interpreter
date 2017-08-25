@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef uint64_t Variable;
@@ -38,5 +39,6 @@ Expression application(Expression function, Expression argument);
 
 void print_expression(Expression expression);
 
+bool check_equal_expression(Expression a, Expression b);
 Expression copy_expression(Expression expression);
 void free_expression(Expression *expression);

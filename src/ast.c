@@ -111,6 +111,33 @@ static void _print_expression(Expression expression, const char *letters,
   }
 }
 
+bool check_equal_expression(Expression a, Expression b) {
+  if (a == NULL || b == NULL) return false;
+  if (a->type == b->type) {
+    switch (a->type) {
+      case VARIABLE:
+        return a->variable == b->variable;
+        break;
+      case LAMBDA:
+        return check_equal_expression(a->lambda, b->lambda);
+        break;
+      case APPLICATION: {
+        Expression af = a->application->function;
+        Expression ax = a->application->argument;
+        Expression bf = b->application->function;
+        Expression bx = b->application->argument;
+        return check_equal_expression(af, bf) &&\
+          check_equal_expression(ax, bx);
+        break;
+      }
+      default:
+        return false;
+    }
+  } else {
+    return false;
+  }
+}
+
 void free_expression(Expression *expression) {
   if (expression == NULL || *expression == NULL) return;
   switch ((*expression)->type) {

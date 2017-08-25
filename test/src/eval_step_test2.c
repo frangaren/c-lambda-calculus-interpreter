@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 
 #define AST_SHORT
@@ -16,13 +17,10 @@ int main(int argc, char **argv) {
                      lam(app(
                              var(0),
                              var(0))));
-  printf("\t\t");
-  print_expression(e);
-  printf(" ⟶\n");
+  Expression outcome = copy_expression(e);
   step_in_place(&e);
-  printf("\t\t\t");
-  print_expression(e);
-  printf("\n");
+  assert(check_equal_expression(e, outcome));
   free_expression(&e);
+  free_expression(&outcome);
   return 0;
 }
