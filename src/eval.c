@@ -20,7 +20,6 @@ bool step_in_place (Expression *expression) {
       Expression *argument = &(*expression)->application->argument;
       if ((*function)->type == LAMBDA) {
         Expression reduced_function =  (*function)->lambda;
-        _rebase(reduced_function, -1, 1);
         (*function)->lambda = NULL;
         _apply_in_place(&reduced_function, argument, 0);
         free_expression(expression);
@@ -49,6 +48,9 @@ static bool _apply_in_place (Expression *function,
         free_expression(function);
         *function = copy_expression(*argument);
         _rebase(*function, depth, 0);
+        return true;
+      } else if ((*function)->variable > depth) {
+        (*function)->variable--;
         return true;
       } else {
         return false;
