@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   Expression outcome = lam(lam(app(
                                    var(0),
                                    var(1))));
-  step_eval_in_place(&e);
+  eval_in_place(&e);
   assert(check_equal_expression(e, outcome));
   free_expression(&e);
   free_expression(&outcome);

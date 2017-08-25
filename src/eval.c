@@ -100,7 +100,11 @@ static bool _rebase(Expression expression, int rebase_depth, int depth) {
   }
 }
 
-void step_eval_in_place (Expression *expression) {
+void eval_in_place (Expression *expression) {
+  while (step_in_place(expression));
+}
+
+void print_eval_in_place (Expression *expression) {
   print_expression(*expression);
   bool change = false;
   do {

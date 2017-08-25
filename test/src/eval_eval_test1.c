@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
                                    app(
                                        var(1),
                                        var(0)))));
-  step_eval_in_place(&e);
+  eval_in_place(&e);
   assert(check_equal_expression(e, outcome));
   free_expression(&e);
   free_expression(&outcome);
