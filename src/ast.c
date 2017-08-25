@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static void _print_expression(Expression expression, const char *letters,
+  int current, int max);
+
 Expression variable(uint64_t bruijin_index) {
   Expression outcome = malloc(sizeof(struct expression));
   if (outcome == NULL) {
@@ -45,22 +48,10 @@ Expression application(Expression function, Expression argument) {
   }
 }
 
-void free_expression(Expression *expression) {
-  if (expression == NULL) return;
-  switch ((*expression)->type) {
-    case LAMBDA:
-      free_expression(&(*expression)->lambda);
-      break;
-    case APPLICATION:
-      free_expression(&(*expression)->application->function);
-      free_expression(&(*expression)->application->argument);
-      free((*expression)->application);
-      break;
-    default:
-      break;
-  }
-  free(*expression);
-  *expression = NULL;
+void print_expression(Expression expression) {
+  const char letters[] =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  _print_expression(expression, letters, 0, sizeof(letters)/sizeof(char) - 1);
 }
 
 static void _print_expression(Expression expression, const char *letters,
@@ -120,8 +111,59 @@ static void _print_expression(Expression expression, const char *letters,
   }
 }
 
-void print_expression(Expression expression) {
-  const char letters[] =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  _print_expression(expression, letters, 0, sizeof(letters)/sizeof(char) - 1);
+void free_expression(Expression *expression) {
+  if (expression == NULL) return;
+  switch ((*expression)->type) {
+    case LAMBDA:
+      free_expression(&(*expression)->lambda);
+      break;
+    case APPLICATION:
+      free_expression(&(*expression)->application->function);
+      free_expression(&(*expression)->application->argument);
+      free((*expression)->application);
+      break;
+    default:
+      break;
+  }
+  free(*expression);
+  *expression = NULL;
+}
+
+Expression copy_expression(Expression expression) {
+  Expression outcome = NULL;
+  switch (expression->type) {
+    case VARIABLE:
+      outcome = variable(expression->variable);
+      break;
+    case LAMBDA: {
+      Expression lambda_expression = copy_expression(expression->lambda);
+      if (lambda_expression == NULL) return NULL;
+      outcome = lambda(lambda_expression);
+      if (outcome == NULL) {
+        free_expression(&lambda_expression);
+        return NULL;
+      }
+      break;
+    }
+    case APPLICATION: {
+      Expression function = copy_expression(expression->application->function);
+      if (function == NULL) return NULL;
+      Expression argument = copy_expression(expression->application->argument);
+      if (argument == NULL) {
+        free_expression(&argument);
+        return NULL;
+      }
+      outcome = application(function, argument);
+      if (outcome == NULL) {
+        free_expression(&function);
+        free_expression(&argument);
+        return NULL;
+      }
+      break;
+    }
+    default:
+      return NULL;
+      break;
+  }
+  return outcome;
 }

@@ -36,5 +36,7 @@ Expression application(Expression function, Expression argument);
 #define app(f, x) (application((f),(x)))
 #endif
 
-void free_expression(Expression *expression);
 void print_expression(Expression expression);
+
+Expression copy_expression(Expression expression);
+void free_expression(Expression *expression);
