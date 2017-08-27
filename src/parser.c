@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "queue.h"
+
 /**********
 * GRAMMAR *
 ***********
@@ -20,8 +22,7 @@ Application ::= Function Argument
 Function    ::= Variable
               | Application
               | "(" Expression ")"
-Argument    ::= Lambda
-              | Variable
+Argument    ::= Variable
               | "(" Expression ")"
 
 */
@@ -29,9 +30,7 @@ Argument    ::= Lambda
 static Expression parse_expression(Parser parser);
 static Expression parse_lambda(Parser parser);
 static Expression parse_variable(Parser parser);
-//static Expression parse_application(Parser parser);
-//static Expression parse_function(Parser parser);
-//static Expression parse_argument(Parser parser);
+static Expression parse_possible_application(Parser parser);
 static Expression parse_parenthesis(Parser parser);
 
 Parser new_parser(Lexer lexer) {
@@ -68,14 +67,14 @@ Expression parse_expression(Parser parser) {
   if (peek_next_token(parser->lexer).type == TKN_LAMBDA) {
     // Lambda rule
     return parse_lambda(parser);
-  } else if (peek_next_token(parser->lexer).type == TKN_NAME) {
-    // Variable
-    return parse_variable(parser);
-  } else if (peek_next_token(parser->lexer).type == TKN_LPAREN) {
+  } else if (peek_next_token(parser->lexer).type == TKN_NAME ||
+             peek_next_token(parser->lexer).type == TKN_LPAREN) {
     // Parenthesis
-    return parse_parenthesis(parser);
+    return parse_possible_application(parser);
   } else {
-    return NULL;
+    fprintf(stderr, "%s: Error, lambda(\\), name or left parenthesis"\
+                    "('(') expected.\n", __func__);
+    exit(-2);
   }
 }
 
@@ -122,9 +121,9 @@ static Expression parse_variable(Parser parser) {
   }
   uint64_t index;
   if (!get_variable_bruijin(&parser->resolver, token.name, &index)) {
-    free_token(token);
     fprintf(stderr, "%s: Couldn't find '%s'. Variable not in scope.\n",
       __func__, token.name);
+    free_token(token);
     exit(-2);
   }
   free_token(token);
@@ -161,4 +160,44 @@ static Expression parse_parenthesis(Parser parser) {
   }
   free_token(token);
   return expression;
+}
+
+static Expression parse_possible_application(Parser parser) {
+  Queue queue = new_queue();
+  while (1) {
+    if (peek_next_token(parser->lexer).type == TKN_NAME) {
+      Expression expression = parse_variable(parser);
+      if (!push_to_queue(queue, expression)) {
+        free_expression(&expression);
+        fprintf(stderr, "%s: Couldn't push to queue.\n", __func__);
+        exit(-2);
+      }
+    } else if (peek_next_token(parser->lexer).type == TKN_LPAREN) {
+      Expression expression = parse_parenthesis(parser);
+      if (!push_to_queue(queue, expression)) {
+        free_expression(&expression);
+        fprintf(stderr, "%s: Couldn't push to queue.\n", __func__);
+        exit(-2);
+      }
+    } else {
+      break;
+    }
+  }
+  if (queue->length == 0) {
+    fprintf(stderr, "%s: Application expected.\n", __func__);
+    exit(-2);
+  } else if (queue->length == 1) {
+    Expression expression = pop_from_queue(queue);
+    free_queue(&queue);
+    return expression;
+  } else {
+    Expression accumulator = pop_from_queue(queue);
+    Expression x;
+    while (!is_empty_queue(queue)) {
+      x = pop_from_queue(queue);
+      accumulator = application(accumulator, x);
+    }
+    free_queue(&queue);
+    return accumulator;
+  }
 }
