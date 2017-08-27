@@ -17,6 +17,7 @@ Lexer new_lexer(FILE *stream) {
   Lexer lexer = malloc(sizeof(struct lexer));
   if (lexer == NULL) return NULL;
   lexer->stream = stream;
+  lexer->is_token_buffered = false;
   return lexer;
 }
 
