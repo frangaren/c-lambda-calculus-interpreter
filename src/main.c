@@ -1,17 +1,18 @@
 #ifdef EXE
+
+#include "parser.h"
 #include "lexer.h"
 #include "token.h"
+#include "ast.h"
+#include "eval.h"
 
 int main(int argc, char **argv) {
   Lexer lexer = new_lexer(stdin);
-  Token token = get_next_token(lexer);
-  while (token.type != TKN_EOF) {
-    print_token(token);
-    free_token(token);
-    token = get_next_token(lexer);
-  }
-  print_token(token);
-  free_token(token);
+  Parser parser = new_parser(lexer);
+  Expression e = parse_expression(parser);
+  print_eval_in_place(&e);
+  free_expression(&e);
+  free_parser(&parser);
   free_lexer(&lexer);
   return 0;
 }

@@ -8,6 +8,7 @@ static bool _apply_in_place (Expression *function, Expression *argument,
 static bool _rebase(Expression argument, int rebase_depth, int depth);
 
 bool step_in_place (Expression *expression) {
+  if (expression == NULL || *expression == NULL) return false;
   switch ((*expression)->type) {
     case VARIABLE:
       return false;
@@ -105,6 +106,10 @@ void eval_in_place (Expression *expression) {
 }
 
 void print_eval_in_place (Expression *expression) {
+  if (expression == NULL || *expression == NULL) {
+    printf("\n");
+    return;
+  }
   print_expression(*expression);
   bool change = false;
   do {
