@@ -1,5 +1,7 @@
 #ifdef EXE
 
+#include <stdio.h>
+
 #include "parser.h"
 #include "lexer.h"
 #include "token.h"
@@ -12,7 +14,9 @@ int main(int argc, char **argv) {
   Parser parser = new_parser(lexer);
   Expression e = parse(parser);
   printf("\nOutput:\n");
-  print_eval_in_place(&e);
+  eval_in_place(&e);
+  print_expression(e);
+  printf("\n");
   free_expression(&e);
   free_parser(&parser);
   free_lexer(&lexer);

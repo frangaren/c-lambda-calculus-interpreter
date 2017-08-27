@@ -1,0 +1,39 @@
+(
+  \fix.
+  \true.
+  \false.
+  \succ.
+  \pred.
+  \number.
+  \0.
+  (
+    (
+      \1.
+      \prod.
+      \is_zero.
+      (
+        (
+          \h_factorial.
+          (
+            (
+              \factorial.
+              factorial number
+            )
+            ((\factorial.(fix h_factorial));)
+          )
+        )
+        ((\h_factorial.(\f.\n. (is_zero n) 1 (prod n (f (pred n) ) ) ));)
+      )
+    )
+    ((\1.(succ 0));)
+    ((\prod.(\a.\b. a (b succ) 0));)
+    ((\is_zero.(\n.n (\x.false) true));)
+  )
+)
+((\fix.(\f. (\x. f (x x)) (\x. f (x x)) ));)
+((\true.(\a.\b. a));)
+((\false.(\a.\b. b));)
+((\succ.(\n.\s.\z. s (n s z)));)
+((\pred.(\n.\s.\z. n (\ss.\s'. s' (ss s)) (\x.z) (\x.x) ));)
+((\number.(\s.\z. s (s (s z))));)
+((\0.(\s.\z. z));)

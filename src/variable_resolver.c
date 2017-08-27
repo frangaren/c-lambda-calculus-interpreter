@@ -47,8 +47,9 @@ bool add_variable_scope(VariableResolver *vr) {
 bool drop_variable_scope(VariableResolver *vr) {
   if (vr == NULL || *vr == NULL) return false;
   VariableResolver to_delete = *vr, cursor = *vr;
-  while (cursor != NULL) {
-    if (cursor->name == NULL) break;
+  bool should_end = false;
+  while (cursor != NULL && !should_end) {
+    if (cursor->name == NULL) should_end = true;
     to_delete = cursor;
     cursor = cursor->next;
     if (to_delete->name != NULL) free(to_delete->name);
