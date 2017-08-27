@@ -120,14 +120,14 @@ static Expression parse_variable(Parser parser) {
     exit(-2);
   }
   uint64_t index;
+  Expression expression = NULL;
   if (!get_variable_bruijin(&parser->resolver, token.name, &index)) {
-    fprintf(stderr, "%s: Couldn't find '%s'. Variable not in scope.\n",
-      __func__, token.name);
-    free_token(token);
-    exit(-2);
+    expression = global(token.name);
+  } else {
+    expression = variable(index);
   }
   free_token(token);
-  return variable(index);
+  return expression;
 }
 
 static Expression parse_parenthesis(Parser parser) {

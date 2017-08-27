@@ -13,6 +13,7 @@ void free_variable_resolver(VariableResolver *vr) {
   while (cursor != NULL) {
     to_delete = cursor;
     cursor = cursor->next;
+    if (to_delete->name != NULL) free(to_delete->name);
     free(to_delete);
   }
   *vr = NULL;
@@ -50,6 +51,7 @@ bool drop_variable_scope(VariableResolver *vr) {
     if (cursor->name == NULL) break;
     to_delete = cursor;
     cursor = cursor->next;
+    if (to_delete->name != NULL) free(to_delete->name);
     free(to_delete);
   }
   *vr = cursor;

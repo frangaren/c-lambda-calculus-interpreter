@@ -3,6 +3,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static void _print_expression(Expression expression, const char *letters,
   int current, int max);
@@ -48,6 +49,23 @@ Expression application(Expression function, Expression argument) {
   }
 }
 
+Expression global(char *name) {
+  Expression outcome = malloc(sizeof(struct expression));
+  if (outcome == NULL) {
+    return NULL;
+  } else {
+    *outcome = (struct expression) {.type = GLOBAL};
+    outcome->global = malloc((strlen(name) + 1) * sizeof(char));
+    if (outcome->global == NULL) {
+      free(outcome);
+      return NULL;
+    } else {
+      strcpy(outcome->global, name);
+      return outcome;
+    }
+  }
+}
+
 void print_expression(Expression expression) {
   const char letters[] =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -82,25 +100,32 @@ static void _print_expression(Expression expression, const char *letters,
       Expression function = expression->application->function;
       Expression argument = expression->application->argument;
       switch (function->type) {
+        case GLOBAL:
         case VARIABLE:
         case APPLICATION:
           _print_expression(function, letters, current, max);
           break;
-        default:
+        case LAMBDA:
           printf("(");
           _print_expression(function, letters, current, max);
           printf(")");
       }
       printf(" ");
       switch (argument->type) {
+        case GLOBAL:
         case VARIABLE:
           _print_expression(argument, letters, current, max);
           break;
-        default:
+        case LAMBDA:
+        case APPLICATION:
           printf("(");
           _print_expression(argument, letters, current, max);
           printf(")");
       }
+      break;
+    }
+    case GLOBAL: {
+      printf("%s", expression->global);
       break;
     }
     default: {
@@ -130,9 +155,10 @@ bool check_equal_expression(Expression a, Expression b) {
           check_equal_expression(ax, bx);
         break;
       }
-      default:
-        return false;
+      case GLOBAL:
+        return strcmp(a->global, b->global) == 0;
     }
+    return false;
   } else {
     return false;
   }
@@ -149,7 +175,9 @@ void free_expression(Expression *expression) {
       free_expression(&(*expression)->application->argument);
       free((*expression)->application);
       break;
-    default:
+    case GLOBAL:
+      free((*expression)->global);
+    case VARIABLE:
       break;
   }
   free(*expression);
@@ -188,9 +216,9 @@ Expression copy_expression(Expression expression) {
       }
       break;
     }
-    default:
-      return NULL;
-      break;
+    case GLOBAL: {
+      return global(expression->global);
+    }
   }
   return outcome;
 }

@@ -35,9 +35,11 @@ bool step_in_place (Expression *expression) {
       }
       break;
     }
-    default:
+    case GLOBAL:
       return false;
+      break;
   }
+  return false;
 }
 
 static bool _apply_in_place (Expression *function,
@@ -68,9 +70,11 @@ static bool _apply_in_place (Expression *function,
       return left_outcome || right_outcome;
       break;
     }
-    default:
+    case GLOBAL:
       return false;
+      break;
   }
+  return false;
 }
 
 static bool _rebase(Expression expression, int rebase_depth, int depth) {
@@ -95,10 +99,11 @@ static bool _rebase(Expression expression, int rebase_depth, int depth) {
       return left || right;
       break;
     }
-    default:
+    case GLOBAL:
       return false;
       break;
   }
+  return false;
 }
 
 void eval_in_place (Expression *expression) {
