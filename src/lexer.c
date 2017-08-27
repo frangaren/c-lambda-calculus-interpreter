@@ -17,7 +17,6 @@ Lexer new_lexer(FILE *stream) {
   Lexer lexer = malloc(sizeof(struct lexer));
   if (lexer == NULL) return NULL;
   lexer->stream = stream;
-  lexer->next_char = fgetc(lexer->stream);
   return lexer;
 }
 
@@ -80,13 +79,13 @@ Token peek_next_token(Lexer lexer) {
 }
 
 static int peek_next_char(Lexer lexer) {
-  return lexer->next_char;
+  int c = fgetc(lexer->stream);
+  ungetc(c, lexer->stream);
+  return c;
 }
 
 static int get_next_char(Lexer lexer) {
-  int output = lexer->next_char;
-  lexer->next_char = fgetc(lexer->stream);
-  return output;
+  return fgetc(lexer->stream);
 }
 
 static bool is_identifier_char(int c) {

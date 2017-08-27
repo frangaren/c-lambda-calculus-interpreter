@@ -7,7 +7,6 @@
 
 typedef struct lexer {
   FILE *stream;
-  int next_char;
   Token next_token;
   bool is_token_buffered;
 } *Lexer;
