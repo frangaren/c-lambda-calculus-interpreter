@@ -6,6 +6,7 @@
 
 #define MAX_NAME_SIZE 33
 
+static Token raw_get_next_token(Lexer lexer);
 static int peek_next_char(Lexer lexer);
 static int get_next_char(Lexer lexer);
 static bool is_identifier_char(int c);
@@ -25,7 +26,7 @@ void free_lexer(Lexer *lexer) {
   *lexer = NULL;
 }
 
-Token get_next_token(Lexer lexer) {
+static Token raw_get_next_token(Lexer lexer) {
   int c;
   do {
     c = get_next_char(lexer);
@@ -56,6 +57,25 @@ Token get_next_token(Lexer lexer) {
     char *name = malloc((strlen(buffer) + 1) * sizeof(char));
     strcpy(name, buffer);
     return (Token) {.type = TKN_NAME, .name = name};
+  }
+}
+
+Token get_next_token(Lexer lexer) {
+  if (lexer->is_token_buffered) {
+    lexer->is_token_buffered = false;
+    return lexer->next_token;
+  } else {
+    return raw_get_next_token(lexer);
+  }
+}
+
+Token peek_next_token(Lexer lexer) {
+  if (lexer->is_token_buffered) {
+    return lexer->next_token;
+  } else {
+    lexer->is_token_buffered = true;
+    lexer->next_token = raw_get_next_token(lexer);
+    return lexer->next_token;
   }
 }
 
