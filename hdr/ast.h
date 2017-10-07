@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <wchar.h>
 
 typedef uint64_t Variable;
 
@@ -12,7 +13,7 @@ typedef struct application {
   struct expression *argument;
 } *Application;
 
-typedef char *Global;
+typedef wchar_t *Global;
 
 typedef enum expression_type {
   VARIABLE,
@@ -34,7 +35,7 @@ typedef struct expression {
 Expression variable(uint64_t bruijin_index);
 Expression lambda(Expression expression);
 Expression application(Expression function, Expression argument);
-Expression global(char *name);
+Expression global(wchar_t *name);
 
 #ifdef AST_SHORT
 #define var(x)    (variable((x)))

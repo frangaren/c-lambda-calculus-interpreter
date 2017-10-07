@@ -16,7 +16,7 @@ void free_token(Token token) {
 void print_token(Token token) {
   switch (token.type) {
     case TKN_NAME:
-      fprintf(stderr, "<name(\"%s\")>", token.name);
+      fprintf(stderr, "<name(\"%S\")>", token.name);
       break;
     case TKN_EOF:
       fprintf(stderr, "<eof>");

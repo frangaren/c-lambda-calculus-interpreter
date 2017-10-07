@@ -1,5 +1,7 @@
 #pragma once
 
+#include <wchar.h>
+
 typedef enum token_type {
   TKN_LAMBDA,
   TKN_NAME,
@@ -12,7 +14,7 @@ typedef enum token_type {
 typedef struct token {
   TokenType type;
   union {
-    char *name;
+    wchar_t *name;
   };
 } Token;
 

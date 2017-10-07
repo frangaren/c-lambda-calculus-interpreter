@@ -1,39 +1,39 @@
 (
-  \fix.
-  \true.
-  \false.
-  \succ.
-  \pred.
-  \number.
-  \0.
+  λfix.
+  λtrue.
+  λfalse.
+  λsucc.
+  λpred.
+  λnumber.
+  λ0.
   (
     (
-      \1.
-      \prod.
-      \is_zero.
+      λ1.
+      λprod.
+      λis_zero.
       (
         (
-          \h_factorial.
+          λh_factorial.
           (
             (
-              \factorial.
+              λfactorial.
               factorial number
             )
-            ((\factorial.(fix h_factorial));)
+            ((λfactorial.(fix h_factorial));)
           )
         )
-        ((\h_factorial.(\f.\n. (is_zero n) 1 (prod n (f (pred n) ) ) ));)
+        ((λh_factorial.(λf.λn. (is_zero n) 1 (prod n (f (pred n) ) ) ));)
       )
     )
-    ((\1.(succ 0));)
-    ((\prod.(\a.\b. a (b succ) 0));)
-    ((\is_zero.(\n.n (\x.false) true));)
+    ((λ1.(succ 0));)
+    ((λprod.(λa.λb. a (b succ) 0));)
+    ((λis_zero.(λn.n (λx.false) true));)
   )
 )
-((\fix.(\f. (\x. f (x x)) (\x. f (x x)) ));)
-((\true.(\a.\b. a));)
-((\false.(\a.\b. b));)
-((\succ.(\n.\s.\z. s (n s z)));)
-((\pred.(\n.\s.\z. n (\ss.\s'. s' (ss s)) (\x.z) (\x.x) ));)
-((\number.(\s.\z. s (s (s (s (s z))))));)
-((\0.(\s.\z. z));)
+((λfix.(λf. (λx. f (x x)) (λx. f (x x)) ));)
+((λtrue.(λa.λb. a));)
+((λfalse.(λa.λb. b));)
+((λsucc.(λn.λs.λz. s (n s z)));)
+((λpred.(λn.λs.λz. n (λss.λs'. s' (ss s)) (λx.z) (λx.x) ));)
+((λnumber.(λs.λz. s (s (s (s (s z))))));)
+((λ0.(λs.λz. z));)

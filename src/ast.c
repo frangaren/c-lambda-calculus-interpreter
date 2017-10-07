@@ -3,7 +3,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 static void _print_expression(Expression expression, const char *letters,
   int current, int max);
@@ -51,19 +50,19 @@ Expression application(Expression function, Expression argument) {
   }
 }
 
-Expression global(char *name) {
+Expression global(wchar_t *name) {
   if (name == NULL) return NULL;
   Expression outcome = malloc(sizeof(struct expression));
   if (outcome == NULL) {
     return NULL;
   } else {
     *outcome = (struct expression) {.type = GLOBAL};
-    outcome->global = malloc((strlen(name) + 1) * sizeof(char));
+    outcome->global = malloc((wcslen(name) + 1) * sizeof(wchar_t));
     if (outcome->global == NULL) {
       free(outcome);
       return NULL;
     } else {
-      strcpy(outcome->global, name);
+      wcscpy(outcome->global, name);
       return outcome;
     }
   }
@@ -129,7 +128,7 @@ static void _print_expression(Expression expression, const char *letters,
       break;
     }
     case GLOBAL: {
-      printf("%s", expression->global);
+      printf("%S", expression->global);
       break;
     }
     default: {
@@ -160,7 +159,7 @@ bool check_equal_expression(Expression a, Expression b) {
         break;
       }
       case GLOBAL:
-        return strcmp(a->global, b->global) == 0;
+        return wcscmp(a->global, b->global) == 0;
     }
     return false;
   } else {

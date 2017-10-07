@@ -1,7 +1,7 @@
 #include "variable_resolver.h"
 
 #include <stdlib.h>
-#include <string.h>
+#include <wchar.h>
 
 VariableResolver new_variable_resolver() {
   return NULL;
@@ -19,17 +19,17 @@ void free_variable_resolver(VariableResolver *vr) {
   *vr = NULL;
 }
 
-bool add_variable(VariableResolver *vr, char *name) {
+bool add_variable(VariableResolver *vr, wchar_t *name) {
   if (vr == NULL) return false;
   VariableResolver node = malloc(sizeof(struct variable_resolver));
   if (node == NULL) return false;
   node->next = *vr;
-  node->name = malloc((strlen(name) + 1) * sizeof(char));
+  node->name = malloc((wcslen(name) + 1) * sizeof(wchar_t));
   if (node->name == NULL) {
     free(node);
     return false;
   }
-  strcpy(node->name, name);
+  wcscpy(node->name, name);
   *vr = node;
   return true;
 }
@@ -59,13 +59,14 @@ bool drop_variable_scope(VariableResolver *vr) {
   return true;
 }
 
-bool get_variable_bruijin(VariableResolver *vr, char *name, uint64_t *index) {
+bool get_variable_bruijin(VariableResolver *vr, wchar_t *name,
+  uint64_t *index) {
   if (vr == NULL || *vr == NULL) return false;
   VariableResolver cursor = *vr;
   *index = 0;
   while (cursor != NULL) {
     if (cursor->name != NULL) {
-      if (strcmp(name, cursor->name) == 0) {
+      if (wcscmp(name, cursor->name) == 0) {
         return true;
       }
       (*index)++;

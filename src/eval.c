@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <wctype.h>
 
 static bool _apply_in_place (Expression *function, Expression *argument,
   int depth);

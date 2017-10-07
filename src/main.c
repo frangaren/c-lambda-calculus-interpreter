@@ -1,5 +1,6 @@
 #ifdef EXE
 
+#include <locale.h>
 #include <stdio.h>
 
 #include "parser.h"
@@ -9,6 +10,7 @@
 #include "eval.h"
 
 int main(int argc, char **argv) {
+  setlocale(LC_CTYPE, "en_US.utf8");
   if (argc != 2) {
     fprintf(stderr, "\tExpected one argument. %d given.\n", argc - 1);
     return 2;
