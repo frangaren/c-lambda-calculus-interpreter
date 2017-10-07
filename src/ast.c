@@ -68,6 +68,43 @@ Expression global(wchar_t *name) {
   }
 }
 
+Statement expression(Expression expression) {
+  if (expression == NULL) return NULL;
+  Statement outcome = malloc(sizeof(struct statement));
+  if (outcome == NULL) {
+    return NULL;
+  } else {
+    *outcome = (struct statement) {.type = EXPRESSION,
+                                   .expression = expression};
+    return outcome;
+  }
+}
+
+Statement let(Global binding, Expression expression) {
+  if (expression == NULL || binding == NULL) return NULL;
+  Statement outcome = malloc(sizeof(struct statement));
+  if (outcome == NULL) {
+    return NULL;
+  } else {
+    Let let = malloc(sizeof(struct let));
+    if (let == NULL) {
+      free(outcome);
+      return NULL;
+    } else {
+      let->binding = malloc((wcslen(binding) + 1)*sizeof(wchar_t));
+      if (let->binding == NULL) {
+        return NULL;
+      } else {
+        wcscpy(let->binding, binding);
+        let->expression = expression;
+        *outcome = (struct statement) {.type = LET,
+                                       .let = let};
+        return outcome;
+      }
+    }
+  }
+}
+
 void print_expression(Expression expression) {
   if (expression == NULL) return;
   const char letters[] =
@@ -224,4 +261,70 @@ Expression copy_expression(Expression expression) {
     }
   }
   return outcome;
+}
+
+void print_statement(Statement statement) {
+  if (statement == NULL) return;
+  switch (statement->type) {
+    case EXPRESSION:
+      print_expression(statement->expression);
+      break;
+    case LET:
+      printf("let %S := ", statement->let->binding);
+      print_expression(statement->let->expression);
+      break;
+    default:
+      fprintf(stderr, "%s: Error, undefinded behaviour.\n", __func__);
+  }
+  printf(";");
+}
+
+bool check_equal_statement(Statement a, Statement b) {
+  if (a == NULL || b == NULL) return false;
+  if (a->type == b->type) {
+    switch (a->type) {
+      case EXPRESSION:
+        return check_equal_expression(a->expression, b->expression);
+        break;
+      case LET:
+        if (wcscmp(a->let->binding, b->let->binding) != 0) {
+          return false;
+        }
+        return check_equal_expression(a->let->expression, b->let->expression);
+    }
+    return false;
+  } else {
+    return false;
+  }
+}
+
+Statement copy_statement(Statement statement) {
+  if (statement != NULL) {
+    switch (statement->type) {
+      case EXPRESSION:
+        return expression(copy_expression(statement->expression));
+        break;
+      case LET:
+        return let(statement->let->binding,
+                   copy_expression(statement->let->expression));
+        break;
+    }
+  }
+  return NULL;
+}
+
+void free_statement(Statement *statement) {
+  if (statement == NULL || *statement == NULL) return;
+  switch ((*statement)->type) {
+    case EXPRESSION:
+      free_expression(&(*statement)->expression);
+      break;
+    case LET:
+      free((*statement)->let->binding);
+      (*statement)->let->binding = NULL;
+      free_expression(&(*statement)->let->expression);
+      break;
+  }
+  free(*statement);
+  *statement = NULL;
 }

@@ -12,4 +12,4 @@ typedef struct parser {
 Parser new_parser(Lexer lexer);
 Lexer free_parser(Parser *parser);
 
-Expression parse(Parser parser);
+Statement parse(Parser parser);

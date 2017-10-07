@@ -8,6 +8,9 @@ typedef enum token_type {
   TKN_DOT,
   TKN_LPAREN,
   TKN_RPAREN,
+  TKN_ASSIGN,
+  TKN_LET,
+  TKN_SEPARATOR,
   TKN_EOF
 } TokenType;
 

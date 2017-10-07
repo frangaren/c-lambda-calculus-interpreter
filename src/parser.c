@@ -11,8 +11,8 @@
 ***********
 
 Program     ::= Step* EOF
-Statement   ::= Let | Expression
-Let         ::= "let" Name ":=" Expression
+Statement   ::= (Let | Expression) ";"
+Let         ::= "let" Name "=" Expression
 Expression  ::= Lambda
               | Variable
               | Application
@@ -29,6 +29,8 @@ Argument    ::= Variable
 
 */
 
+static Statement parse_statement(Parser parser);
+static Statement parse_let(Parser parser);
 static Expression parse_expression(Parser parser);
 static Expression parse_lambda(Parser parser);
 static Expression parse_variable(Parser parser);
@@ -52,14 +54,64 @@ Lexer free_parser(Parser *parser) {
   return lexer;
 }
 
-Expression parse(Parser parser) {
-  if (peek_next_token(parser->lexer).type == TKN_EOF) {
+Statement parse(Parser parser) {
+  Token token = peek_next_token(parser->lexer);
+  if (token.type == TKN_EOF) {
     return NULL;
   } else {
-    Expression expression = parse_expression(parser);
-    if (expression == NULL) return NULL;
-    return expression;
+    return parse_statement(parser);
   }
+}
+
+static Statement parse_statement(Parser parser) {
+  Statement statement = NULL;
+  Token token = peek_next_token(parser->lexer);
+  if (token.type == TKN_LET){
+    statement = parse_let(parser);
+  } else {
+    statement = expression(parse_expression(parser));
+  }
+  token = get_next_token(parser->lexer);
+  if (token.type != TKN_SEPARATOR) {
+    free_token(token);
+    fprintf(stderr, "%s: Error, separator(;) expected.\n", __func__);
+    return NULL;
+  }
+  free_token(token);
+  return statement;
+}
+
+static Statement parse_let(Parser parser) {
+  // <let><name><assign><expression>
+  Token token = get_next_token(parser->lexer);
+  if (token.type != TKN_LET) {
+    free_token(token);
+    fprintf(stderr, "%s: Error, let expected.\n", __func__);
+    return NULL;
+  }
+  free_token(token);
+  Token name_token = get_next_token(parser->lexer);
+  if (name_token.type != TKN_NAME) {
+    free_token(token);
+    fprintf(stderr, "%s: Error, name expected.\n", __func__);
+    return NULL;
+  }
+  token = get_next_token(parser->lexer);
+  if (token.type != TKN_ASSIGN) {
+    free_token(name_token);
+    free_token(token);
+    fprintf(stderr, "%s: Error, assign(:=) expected.\n", __func__);
+    return NULL;
+  }
+  free_token(token);
+  Expression expression = parse_expression(parser);
+  if (expression == NULL) {
+    free_token(name_token);
+    return NULL;
+  }
+  Statement statement = let(name_token.name, expression);
+  free_token(name_token);
+  return statement;
 }
 
 Expression parse_expression(Parser parser) {

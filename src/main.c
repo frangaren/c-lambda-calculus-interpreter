@@ -18,13 +18,13 @@ int main(int argc, char **argv) {
   FILE *input = fopen(argv[1], "r");
   Lexer lexer = new_lexer(input);
   Parser parser = new_parser(lexer);
-  Expression e = parse(parser);
-  while (e != NULL) {
-    eval_in_place(&e);
-    print_expression(e);
+  Statement s = parse(parser);
+  while (s != NULL) {
+    //eval_in_place(&s);
+    print_statement(s);
     printf("\n");
-    free_expression(&e);
-    e = parse(parser);
+    free_statement(&s);
+    s = parse(parser);
   }
   free_parser(&parser);
   free_lexer(&lexer);

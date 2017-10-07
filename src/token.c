@@ -33,8 +33,14 @@ void print_token(Token token) {
     case TKN_RPAREN:
       fprintf(stderr, "<)>");
       break;
-    default:
-      fprintf(stderr, "<INVALID TOKEN>");
+    case TKN_LET:
+      fprintf(stderr, "<let>");
+      break;
+    case TKN_ASSIGN:
+      fprintf(stderr, "<=>");
+      break;
+    case TKN_SEPARATOR:
+      fprintf(stderr, "<;>");
       break;
   }
 }

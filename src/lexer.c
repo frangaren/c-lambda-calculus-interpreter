@@ -38,6 +38,8 @@ static Token raw_get_next_token(Lexer lexer) {
     return (Token) {.type = TKN_LAMBDA};
   } else if (c == L'.') {
     return (Token) {.type = TKN_DOT};
+  } else if (c == L';') {
+    return (Token) {.type = TKN_SEPARATOR};
   } else if (c == L'(') {
     return (Token) {.type = TKN_LPAREN};
   } else if (c == L')') {
@@ -55,9 +57,15 @@ static Token raw_get_next_token(Lexer lexer) {
       i++;
     }
     buffer[i] = L'\0';
-    wchar_t *name = malloc((wcslen(buffer) + 1) * sizeof(wchar_t));
-    wcscpy(name, buffer);
-    return (Token) {.type = TKN_NAME, .name = name};
+    if (wcscmp(buffer, L"let") == 0) {
+      return (Token) {.type = TKN_LET};
+    } else if (wcscmp(buffer, L"=") == 0) {
+      return (Token) {.type = TKN_ASSIGN};
+    } else {
+      wchar_t *name = malloc((wcslen(buffer) + 1) * sizeof(wchar_t));
+      wcscpy(name, buffer);
+      return (Token) {.type = TKN_NAME, .name = name};
+    }
   }
 }
 
@@ -133,6 +141,7 @@ static bool is_identifier_char(wchar_t c) {
     case L'\\':
     case L'λ':
     case L'.':
+    case L';':
     case L'(':
     case L')':
       return false;
