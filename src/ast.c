@@ -93,6 +93,8 @@ Statement let(Global binding, Expression expression) {
     } else {
       let->binding = malloc((wcslen(binding) + 1)*sizeof(wchar_t));
       if (let->binding == NULL) {
+        free(let);
+        free(outcome);
         return NULL;
       } else {
         wcscpy(let->binding, binding);
@@ -270,7 +272,7 @@ void print_statement(Statement statement) {
       print_expression(statement->expression);
       break;
     case LET:
-      printf("let %S := ", statement->let->binding);
+      printf("let %S = ", statement->let->binding);
       print_expression(statement->let->expression);
       break;
     default:
@@ -323,6 +325,7 @@ void free_statement(Statement *statement) {
       free((*statement)->let->binding);
       (*statement)->let->binding = NULL;
       free_expression(&(*statement)->let->expression);
+      free((*statement)->let);
       break;
   }
   free(*statement);

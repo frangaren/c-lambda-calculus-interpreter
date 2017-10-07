@@ -8,14 +8,31 @@ static bool _apply_in_place (Expression *function, Expression *argument,
   int depth);
 static bool _rebase(Expression argument, int rebase_depth, int depth);
 
-bool step_in_place (Expression *expression) {
+void eval(Statement statement, VariableResolver *resolver) {
+  if (statement == NULL) return;
+  switch (statement->type) {
+    case EXPRESSION:
+      eval_expression_in_place(&statement->expression, resolver);
+      break;
+    case LET:
+      if (!add_variable(resolver, statement->let->binding,
+                        copy_expression(statement->let->expression))) {
+        fprintf(stderr, "%s: Couldn't add variable '%S'. Not enough memory.\n",
+                __func__, statement->let->binding);
+      }
+      break;
+  }
+}
+
+bool step_expression_in_place (Expression *expression,
+  VariableResolver *resolver) {
   if (expression == NULL || *expression == NULL) return false;
   switch ((*expression)->type) {
     case VARIABLE:
       return false;
       break;
     case LAMBDA:
-      return step_in_place(&(*expression)->lambda);
+      return step_expression_in_place(&(*expression)->lambda, resolver);
       break;
     case APPLICATION: {
       Expression *function = &(*expression)->application->function;
@@ -27,18 +44,27 @@ bool step_in_place (Expression *expression) {
         free_expression(expression);
         *expression = reduced_function;
         return true;
-      } else if (step_in_place(function)) {
+      } else if (step_expression_in_place(function, resolver)) {
         return true;
-      } else if (step_in_place(argument)) {
+      } else if (step_expression_in_place(argument, resolver)) {
         return true;
       } else {
         return false;
       }
       break;
     }
-    case GLOBAL:
-      return false;
+    case GLOBAL: {
+      Expression binding = NULL;
+      if (get_variable_data(resolver, (*expression)->global, &binding)) {
+        Expression new_expression = copy_expression(binding);
+        free_expression(expression);
+        *expression = new_expression;
+        return true;
+      } else {
+        return false;
+      }
       break;
+    }
   }
   return false;
 }
@@ -107,11 +133,13 @@ static bool _rebase(Expression expression, int rebase_depth, int depth) {
   return false;
 }
 
-void eval_in_place (Expression *expression) {
-  while (step_in_place(expression));
+void eval_expression_in_place (Expression *expression,
+  VariableResolver *resolver) {
+  while (step_expression_in_place(expression, resolver));
 }
 
-void print_eval_in_place (Expression *expression) {
+void print_eval_expression_in_place (Expression *expression,
+  VariableResolver *resolver) {
   if (expression == NULL || *expression == NULL) {
     printf("\n");
     return;
@@ -119,7 +147,7 @@ void print_eval_in_place (Expression *expression) {
   print_expression(*expression);
   bool change = false;
   do {
-    change = step_in_place(expression);
+    change = step_expression_in_place(expression, resolver);
     if (change) {
       printf(" ⟶\n\t");
       print_expression(*expression);

@@ -3,11 +3,12 @@
 #include <locale.h>
 #include <stdio.h>
 
-#include "parser.h"
-#include "lexer.h"
-#include "token.h"
 #include "ast.h"
 #include "eval.h"
+#include "lexer.h"
+#include "parser.h"
+#include "token.h"
+#include "variable_resolver.h"
 
 int main(int argc, char **argv) {
   setlocale(LC_CTYPE, "en_US.utf8");
@@ -18,14 +19,16 @@ int main(int argc, char **argv) {
   FILE *input = fopen(argv[1], "r");
   Lexer lexer = new_lexer(input);
   Parser parser = new_parser(lexer);
+  VariableResolver resolver = new_variable_resolver();
   Statement s = parse(parser);
   while (s != NULL) {
-    //eval_in_place(&s);
+    eval(s, &resolver);
     print_statement(s);
     printf("\n");
     free_statement(&s);
     s = parse(parser);
   }
+  free_variable_resolver(&resolver);
   free_parser(&parser);
   free_lexer(&lexer);
   fclose(input);

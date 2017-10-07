@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
                              var(0),
                              var(0))));
   Expression outcome = copy_expression(e);
-  step_in_place(&e);
+  step_expression_in_place(&e, NULL);
   assert(check_equal_expression(e, outcome));
   free_expression(&e);
   free_expression(&outcome);

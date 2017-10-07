@@ -144,7 +144,7 @@ static Expression parse_lambda(Parser parser) {
     fprintf(stderr, "%s: Error, name expected.\n", __func__);
     return NULL;
   }
-  if (!add_variable(&parser->resolver, token.name)) {
+  if (!add_variable(&parser->resolver, token.name, NULL)) {
     free_token(token);
     fprintf(stderr, "%s: Couldn't add variable '%S'. Not enough memory.\n",
       __func__, token.name);

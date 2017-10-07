@@ -14,17 +14,19 @@ void free_variable_resolver(VariableResolver *vr) {
     to_delete = cursor;
     cursor = cursor->next;
     if (to_delete->name != NULL) free(to_delete->name);
+    if (to_delete->expression != NULL) free_expression(&to_delete->expression);
     free(to_delete);
   }
   *vr = NULL;
 }
 
-bool add_variable(VariableResolver *vr, wchar_t *name) {
+bool add_variable(VariableResolver *vr, wchar_t *name, Expression expression) {
   if (vr == NULL) return false;
   VariableResolver node = malloc(sizeof(struct variable_resolver));
   if (node == NULL) return false;
   node->next = *vr;
   node->name = malloc((wcslen(name) + 1) * sizeof(wchar_t));
+  node->expression = expression;
   if (node->name == NULL) {
     free(node);
     return false;
@@ -40,6 +42,7 @@ bool add_variable_scope(VariableResolver *vr) {
   if (node == NULL) return false;
   node->next = *vr;
   node->name = NULL;
+  node->expression = NULL;
   *vr = node;
   return true;
 }
@@ -53,6 +56,7 @@ bool drop_variable_scope(VariableResolver *vr) {
     to_delete = cursor;
     cursor = cursor->next;
     if (to_delete->name != NULL) free(to_delete->name);
+    if (to_delete->expression != NULL) free_expression(&to_delete->expression);
     free(to_delete);
   }
   *vr = cursor;
@@ -70,6 +74,22 @@ bool get_variable_bruijin(VariableResolver *vr, wchar_t *name,
         return true;
       }
       (*index)++;
+    }
+    cursor = cursor->next;
+  }
+  return false;
+}
+
+bool get_variable_data(VariableResolver *vr, wchar_t *name,
+  Expression *expression) {
+  if (vr == NULL || *vr == NULL || expression == NULL) return false;
+  VariableResolver cursor = *vr;
+  while (cursor != NULL) {
+    if (cursor->name != NULL) {
+      if (wcscmp(name, cursor->name) == 0) {
+        *expression = cursor->expression;
+        return true;
+      }
     }
     cursor = cursor->next;
   }

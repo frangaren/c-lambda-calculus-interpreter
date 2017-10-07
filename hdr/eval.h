@@ -3,7 +3,13 @@
 #include <stdbool.h>
 
 #include "ast.h"
+#include "variable_resolver.h"
 
-bool step_in_place (Expression *expression);
-void eval_in_place (Expression *expression);
-void print_eval_in_place (Expression *expression);
+void eval(Statement statement, VariableResolver *resolver);
+
+bool step_expression_in_place (Expression *expression,
+  VariableResolver *resolver);
+void eval_expression_in_place (Expression *expression,
+  VariableResolver *resolver);
+void print_eval_expression_in_place (Expression *expression,
+  VariableResolver *resolver);
