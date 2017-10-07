@@ -10,7 +10,9 @@
 * GRAMMAR *
 ***********
 
-Program     ::= Expression EOF
+Program     ::= Step* EOF
+Statement   ::= Let | Expression
+Let         ::= "let" Name ":=" Expression
 Expression  ::= Lambda
               | Variable
               | Application
@@ -51,17 +53,13 @@ Lexer free_parser(Parser *parser) {
 }
 
 Expression parse(Parser parser) {
-  Expression expression = parse_expression(parser);
-  if (expression == NULL) return NULL;
-  Token token = get_next_token(parser->lexer);
-  if (token.type != TKN_EOF) {
-    free_expression(&expression);
-    free_token(token);
-    fprintf(stderr, "%s: Error, end of file expected.\n", __func__);
+  if (peek_next_token(parser->lexer).type == TKN_EOF) {
     return NULL;
+  } else {
+    Expression expression = parse_expression(parser);
+    if (expression == NULL) return NULL;
+    return expression;
   }
-  free_token(token);
-  return expression;
 }
 
 Expression parse_expression(Parser parser) {
