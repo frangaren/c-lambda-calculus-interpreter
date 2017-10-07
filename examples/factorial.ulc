@@ -35,5 +35,5 @@
 ((\false.(\a.\b. b));)
 ((\succ.(\n.\s.\z. s (n s z)));)
 ((\pred.(\n.\s.\z. n (\ss.\s'. s' (ss s)) (\x.z) (\x.x) ));)
-((\number.(\s.\z. s (s (s z))));)
+((\number.(\s.\z. s (s (s (s (s z))))));)
 ((\0.(\s.\z. z));)

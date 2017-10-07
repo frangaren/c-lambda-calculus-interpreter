@@ -20,6 +20,7 @@ Expression variable(uint64_t bruijin_index) {
 }
 
 Expression lambda(Expression expression) {
+  if (expression == NULL) return NULL;
   Expression outcome = malloc(sizeof(struct expression));
   if (outcome == NULL) {
     return NULL;
@@ -31,6 +32,7 @@ Expression lambda(Expression expression) {
 }
 
 Expression application(Expression function, Expression argument) {
+  if (function == NULL || argument == NULL) return NULL;
   Expression outcome = malloc(sizeof(struct expression));
   if (outcome == NULL) {
     return NULL;
@@ -50,6 +52,7 @@ Expression application(Expression function, Expression argument) {
 }
 
 Expression global(char *name) {
+  if (name == NULL) return NULL;
   Expression outcome = malloc(sizeof(struct expression));
   if (outcome == NULL) {
     return NULL;
@@ -67,6 +70,7 @@ Expression global(char *name) {
 }
 
 void print_expression(Expression expression) {
+  if (expression == NULL) return;
   const char letters[] =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   _print_expression(expression, letters, 0, sizeof(letters)/sizeof(char) - 1);

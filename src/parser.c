@@ -52,12 +52,13 @@ Lexer free_parser(Parser *parser) {
 
 Expression parse(Parser parser) {
   Expression expression = parse_expression(parser);
+  if (expression == NULL) return NULL;
   Token token = get_next_token(parser->lexer);
   if (token.type != TKN_EOF) {
     free_expression(&expression);
     free_token(token);
     fprintf(stderr, "%s: Error, end of file expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   free_token(token);
   return expression;
@@ -74,7 +75,7 @@ Expression parse_expression(Parser parser) {
   } else {
     fprintf(stderr, "%s: Error, lambda(\\), name or left parenthesis"\
                     "('(') expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
 }
 
@@ -84,30 +85,31 @@ static Expression parse_lambda(Parser parser) {
   if (token.type != TKN_LAMBDA) {
     free_token(token);
     fprintf(stderr, "%s: Error, lambda(\\) expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   free_token(token);
   token = get_next_token(parser->lexer);
   if (token.type != TKN_NAME) {
     free_token(token);
     fprintf(stderr, "%s: Error, name expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   if (!add_variable(&parser->resolver, token.name)) {
     free_token(token);
     fprintf(stderr, "%s: Couldn't add variable '%s'. Not enough memory.\n",
       __func__, token.name);
-    exit(2);
+    return NULL;
   }
   free_token(token);
   token = get_next_token(parser->lexer);
   if (token.type != TKN_DOT) {
     free_token(token);
     fprintf(stderr, "%s: Error, dot(.) expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   free_token(token);
   Expression expression = parse_expression(parser);
+  if (expression == NULL) return NULL;
   return lambda(expression);
 }
 
@@ -117,7 +119,7 @@ static Expression parse_variable(Parser parser) {
   if (token.type != TKN_NAME) {
     free_token(token);
     fprintf(stderr, "%s: Error, name expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   uint64_t index;
   Expression expression = NULL;
@@ -127,6 +129,7 @@ static Expression parse_variable(Parser parser) {
     expression = variable(index);
   }
   free_token(token);
+  if (expression == NULL) return NULL;
   return expression;
 }
 
@@ -136,27 +139,28 @@ static Expression parse_parenthesis(Parser parser) {
   if (token.type != TKN_LPAREN) {
     free_token(token);
     fprintf(stderr, "%s: Error, left parenthesis('(') expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   if (!add_variable_scope(&parser->resolver)) {
     free_token(token);
     fprintf(stderr, "%s: Couldn't create a new scope.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   free_token(token);
   Expression expression = parse_expression(parser);
+  if (expression == NULL) return NULL;
   token = get_next_token(parser->lexer);
   if (token.type != TKN_RPAREN) {
     free_expression(&expression);
     free_token(token);
     fprintf(stderr, "%s: Error, right parenthesis(')') expected.\n", __func__);
-    exit(-2);
+    return NULL;
   }
   if (!drop_variable_scope(&parser->resolver)) {
     free_expression(&expression);
     free_token(token);
     fprintf(stderr, "%s: Couldn't drop a scope.\n",__func__);
-    exit(-2);
+    return NULL;
   }
   free_token(token);
   return expression;
@@ -169,15 +173,25 @@ static Expression parse_possible_application(Parser parser) {
       Expression expression = parse_variable(parser);
       if (!push_to_queue(queue, expression)) {
         free_expression(&expression);
+        while (!is_empty_queue(queue)){
+          Expression to_delete = pop_from_queue(queue);
+          free_expression(&to_delete);
+        }
+        free_queue(&queue);
         fprintf(stderr, "%s: Couldn't push to queue.\n", __func__);
-        exit(-2);
+        return NULL;
       }
     } else if (peek_next_token(parser->lexer).type == TKN_LPAREN) {
       Expression expression = parse_parenthesis(parser);
       if (!push_to_queue(queue, expression)) {
         free_expression(&expression);
+        while (!is_empty_queue(queue)){
+          Expression to_delete = pop_from_queue(queue);
+          free_expression(&to_delete);
+        }
+        free_queue(&queue);
         fprintf(stderr, "%s: Couldn't push to queue.\n", __func__);
-        exit(-2);
+        return NULL;
       }
     } else {
       break;
@@ -185,7 +199,7 @@ static Expression parse_possible_application(Parser parser) {
   }
   if (queue->length == 0) {
     fprintf(stderr, "%s: Application expected.\n", __func__);
-    exit(-2);
+    return NULL;
   } else if (queue->length == 1) {
     Expression expression = pop_from_queue(queue);
     free_queue(&queue);
